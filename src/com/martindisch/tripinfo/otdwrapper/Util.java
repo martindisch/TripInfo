@@ -11,9 +11,9 @@ public class Util {
     /**
      * Reads and returns the first line of a text file. Useful for reading the API key from file.
      *
-     * @param filename      path to the file
-     * @return              the first line from the file
-     * @throws IOException  in case the file doesn't exist, the message contains the filename
+     * @param filename path to the file
+     * @return the first line from the file
+     * @throws IOException in case the file doesn't exist, the message contains the filename
      */
     public static String readFirstLine(String filename) throws IOException {
         try {
@@ -34,9 +34,9 @@ public class Util {
     /**
      * Reads a station list CSV and returns a List of Station objects.
      *
-     * @param filename      path to the file
-     * @return              the list of stations in the file
-     * @throws IOException  in case the file doesn't exist, the message contains the filename
+     * @param filename path to the file
+     * @return the list of stations in the file
+     * @throws IOException in case the file doesn't exist, the message contains the filename
      */
     public static ArrayList<Station> readStationList(String filename) throws IOException {
         try {
@@ -65,8 +65,8 @@ public class Util {
     /**
      * Reads a line (from the station list CSV) and returns the station object.
      *
-     * @param line  the original line from CSV
-     * @return      the station object
+     * @param line the original line from CSV
+     * @return the station object
      */
     private static Station parseCSVStation(String line) {
         // return null if given the last line (strange format)
