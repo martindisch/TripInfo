@@ -6,7 +6,7 @@ import com.martindisch.tripinfo.otdwrapper.Station;
 import java.util.ArrayList;
 
 /**
- * This class handles user interaction for selecting departure and arrival stations.
+ * Handles user interaction for selecting departure and arrival stations.
  */
 public class StationSelection {
 
@@ -23,16 +23,16 @@ public class StationSelection {
         for (int i = 0; i < departureStations.size(); i++) {
             System.out.printf("%4s: %s\n", i, departureStations.get(i).getName());
         }
-        System.out.print("Which station do you want: ");
+        System.out.print("Select a station: ");
         int departureIndex = Integer.parseInt(System.console().readLine());
 
         System.out.print("Enter your arrival station: ");
         String arrivalInput = System.console().readLine();
         ArrayList<Station> arrivalStations = handler.searchStation(arrivalInput);
         for (int i = 0; i < arrivalStations.size(); i++) {
-            System.out.printf("%4s: %s\n", i, arrivalStations.get(i).getName());
+            System.out.printf("%4d: %s\n", i, arrivalStations.get(i).getName());
         }
-        System.out.print("Which station do you want: ");
+        System.out.print("Select a station: ");
         int arrivalIndex = Integer.parseInt(System.console().readLine());
 
         return new Station[]{departureStations.get(departureIndex), arrivalStations.get(arrivalIndex)};
