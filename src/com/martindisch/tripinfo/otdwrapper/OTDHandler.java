@@ -1,6 +1,6 @@
 package com.martindisch.tripinfo.otdwrapper;
 
-import com.martindisch.tripinfo.HTTPUtil;
+import com.martindisch.tripinfo.Util.PlatformUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -14,12 +14,14 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+/**
+ * An instance of OTDHandler is capable of making requests to the https://opentransportdata.swiss API.
+ */
 public class OTDHandler {
 
     private String apiKey;
@@ -29,17 +31,13 @@ public class OTDHandler {
     private static final String REQUEST_URL = "https://api.opentransportdata.swiss/trias";
 
     /**
-     * Constructor reads API key and station list from file for later use.
+     * Constructor obtains API key and station list for later use.
      *
-     * @throws IOException if one of the files doesn't exist or something else went wrong while reading
+     * @throws HandlerException in case the API key or station list could not be obtained
      */
-    public OTDHandler() throws IOException {
-        try {
-            apiKey = Util.readFirstLine("apikey.txt");
-            stations = Util.readStationList("bahnhof.csv");
-        } catch (FileNotFoundException e) {
-            throw new FileNotFoundException(e.getMessage() + " not found. This file is necessary to make requests.");
-        }
+    public OTDHandler() throws HandlerException {
+        apiKey = PlatformUtil.getApiKey();
+        stations = PlatformUtil.getStationList();
     }
 
     /**
@@ -58,29 +56,30 @@ public class OTDHandler {
      * Returns a list of trips between the given stations around the current time.
      *
      * @param departure the departure station
-     * @param arrival the arrival station
+     * @param arrival   the arrival station
      * @return a list of trips between the stations
-     * @throws IOException
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws XPathExpressionException
+     * @throws HandlerException in case anything went wrong with obtaining or parsing the request
      */
-    public ArrayList<Trip> getTrips(Station departure, Station arrival) throws IOException, ParserConfigurationException, SAXException, XPathExpressionException {
-        ArrayList<Trip> trips = new ArrayList<>(3);
+    public ArrayList<Trip> getTrips(Station departure, Station arrival) throws HandlerException {
+        try {
+            ArrayList<Trip> trips = new ArrayList<>(3);
 
-        String answer = HTTPUtil.doPostRequest(REQUEST_URL, apiKey, String.format(TRIP_REQUEST, departure.getCode(), arrival.getCode()));
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-        Document doc = dBuilder.parse(new ByteArrayInputStream(answer.getBytes()));
-        XPath xPath = XPathFactory.newInstance().newXPath();
+            String answer = PlatformUtil.doPostRequest(REQUEST_URL, apiKey, String.format(TRIP_REQUEST, departure.getCode(), arrival.getCode()));
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(new ByteArrayInputStream(answer.getBytes()));
+            XPath xPath = XPathFactory.newInstance().newXPath();
 
-        NodeList tripNodes = (NodeList) xPath.evaluate(".//Trip", doc, XPathConstants.NODESET);
-        for (int i = 0; i < tripNodes.getLength(); i++) {
-            Node currentTrip = tripNodes.item(i);
-            String departureTime = xPath.evaluate(".//LegBoard/ServiceDeparture/TimetabledTime", currentTrip);
-            String journeyRef = xPath.evaluate(".//Service/JourneyRef", currentTrip);
-            trips.add(new Trip(departure, arrival, journeyRef, Instant.parse(departureTime)));
+            NodeList tripNodes = (NodeList) xPath.evaluate(".//Trip", doc, XPathConstants.NODESET);
+            for (int i = 0; i < tripNodes.getLength(); i++) {
+                Node currentTrip = tripNodes.item(i);
+                String departureTime = xPath.evaluate(".//LegBoard/ServiceDeparture/TimetabledTime", currentTrip);
+                String journeyRef = xPath.evaluate(".//Service/JourneyRef", currentTrip);
+                trips.add(new Trip(departure, arrival, journeyRef, Instant.parse(departureTime)));
+            }
+            return trips;
+        } catch (SAXException | IOException | ParserConfigurationException | XPathExpressionException e) {
+            throw new HandlerException(e.getMessage());
         }
-        return trips;
     }
 }
