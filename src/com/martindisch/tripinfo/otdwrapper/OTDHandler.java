@@ -28,6 +28,7 @@ public class OTDHandler {
     private ArrayList<Station> stations;
 
     private static final String TRIP_REQUEST = "<Trias version=\"1.1\" xmlns=\"http://www.vdv.de/trias\" xmlns:siri=\"http://www.siri.org.uk/siri\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"><ServiceRequest><RequestPayload><TripRequest><Origin><LocationRef><StopPointRef>%s</StopPointRef></LocationRef></Origin><Destination><LocationRef><StopPointRef>%s</StopPointRef></LocationRef></Destination><Params><IncludeTrackSections>false</IncludeTrackSections><IncludeLegProjection>false</IncludeLegProjection><IncludeIntermediateStops>false</IncludeIntermediateStops></Params></TripRequest></RequestPayload></ServiceRequest></Trias>";
+    private static final String TRIP_INFO_REQUEST = "<?xml version=\"1.0\" encoding=\"utf-16\"?><Trias version=\"1.1\" xmlns=\"http://www.vdv.de/trias\" xmlns:siri=\"http://www.siri.org.uk/siri\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"><ServiceRequest><RequestPayload><TripInfoRequest><JourneyRef>%s</JourneyRef><OperatingDayRef>%s</OperatingDayRef><Params><UseTimetabledDataOnly>false</UseTimetabledDataOnly><IncludeCalls>true</IncludeCalls><IncludePosition>false</IncludePosition><IncludeService>true</IncludeService></Params></TripInfoRequest></RequestPayload></ServiceRequest></Trias>";
     private static final String REQUEST_URL = "https://api.opentransportdata.swiss/trias";
 
     /**
@@ -70,15 +71,52 @@ public class OTDHandler {
             Document doc = dBuilder.parse(new ByteArrayInputStream(answer.getBytes()));
             XPath xPath = XPathFactory.newInstance().newXPath();
 
-            NodeList tripNodes = (NodeList) xPath.evaluate(".//Trip", doc, XPathConstants.NODESET);
+            NodeList tripNodes = (NodeList) xPath.evaluate("//Trip", doc, XPathConstants.NODESET);
             for (int i = 0; i < tripNodes.getLength(); i++) {
-                Node currentTrip = tripNodes.item(i);
-                String departureTime = xPath.evaluate(".//LegBoard/ServiceDeparture/TimetabledTime", currentTrip);
-                String journeyRef = xPath.evaluate(".//Service/JourneyRef", currentTrip);
+                Node trip = tripNodes.item(i);
+                String departureTime = xPath.evaluate(".//LegBoard/ServiceDeparture/TimetabledTime", trip);
+                String journeyRef = xPath.evaluate(".//Service/JourneyRef", trip);
                 trips.add(new Trip(departure, arrival, journeyRef, Instant.parse(departureTime)));
             }
             return trips;
         } catch (SAXException | IOException | ParserConfigurationException | XPathExpressionException e) {
+            throw new HandlerException(e.getMessage());
+        }
+    }
+
+    public Journey getJourney(String journeyRef) throws HandlerException {
+        try {
+            String date = Instant.now().toString().split("T")[0] + "T";
+            String answer = PlatformUtil.doPostRequest(REQUEST_URL, apiKey, String.format(TRIP_INFO_REQUEST, journeyRef, date));
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(new ByteArrayInputStream(answer.getBytes()));
+            XPath xPath = XPathFactory.newInstance().newXPath();
+
+            ArrayList<JourneyCall> calls = new ArrayList<>(30);
+            NodeList children = (NodeList) xPath.evaluate("//TripInfoResult/child::node()", doc, XPathConstants.NODESET);
+            for (int i = 0; i < children.getLength(); i++) {
+                Node call = children.item(i);
+                String elementName = xPath.evaluate("name(.)", call);
+                if (elementName.contentEquals("PreviousCall") || elementName.contentEquals("OnwardCall")) {
+                    String name = xPath.evaluate("./StopPointName/Text", call);
+                    int type = elementName.contentEquals("PreviousCall") ? JourneyCall.PREVIOUS : JourneyCall.ONWARD;
+                    String arrivalTimetabled = xPath.evaluate("./ServiceArrival/TimetabledTime", call);
+                    String arrivalEstimated = xPath.evaluate("./ServiceArrival/EstimatedTime", call);
+                    String departureTimetabled = xPath.evaluate("./ServiceDeparture/TimetabledTime", call);
+                    String departureEstimated = xPath.evaluate("./ServiceDeparture/EstimatedTime", call);
+                    JourneyCall journeyCall = new JourneyCall(
+                            name, type,
+                            HandlerUtil.emptyAsNull(arrivalTimetabled),
+                            HandlerUtil.emptyAsNull(arrivalEstimated),
+                            HandlerUtil.emptyAsNull(departureTimetabled),
+                            HandlerUtil.emptyAsNull(departureEstimated)
+                    );
+                    calls.add(journeyCall);
+                }
+            }
+            return new Journey(journeyRef, calls);
+        } catch (IOException | ParserConfigurationException | SAXException | XPathExpressionException e) {
             throw new HandlerException(e.getMessage());
         }
     }

@@ -1,5 +1,7 @@
 package com.martindisch.tripinfo.otdwrapper;
 
+import java.time.Instant;
+
 /**
  * Platform-independent utility functions for {@link OTDHandler}.
  */
@@ -27,5 +29,15 @@ public class HandlerUtil {
         // remove extra information from the station name
         stationAndCode[1] = stationAndCode[1].split("\\$")[0];
         return new Station(stationAndCode[1], stationAndCode[0]);
+    }
+
+    /**
+     * Returns null if input is empty string, otherwise returns {@link Instant} instance from input.
+     *
+     * @param input the string to check
+     * @return if input is empty string null, otherwise input as Instant instance
+     */
+    public static Instant emptyAsNull(String input) {
+        return (input.contentEquals("") ? null : Instant.parse(input));
     }
 }
