@@ -13,7 +13,7 @@ public class StationSelection {
     /**
      * Asks the user for departure and arrival station and returns them in an array.
      *
-     * @param handler instance of OTDHandler that has all the stations
+     * @param handler instance of {@link OTDHandler} that has all the stations
      * @return an array containing the departure and arrival station
      */
     public static Station[] selectStations(OTDHandler handler) {

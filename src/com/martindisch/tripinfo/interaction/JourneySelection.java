@@ -16,7 +16,7 @@ public class JourneySelection {
     /**
      * Presents the user with a list of possible connections and returns the selected one.
      *
-     * @param handler   handler instance for making requests
+     * @param handler   {@link OTDHandler} instance for making requests
      * @param departure the departure station
      * @param arrival   the arrival station
      * @return the selected trip
