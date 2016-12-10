@@ -32,4 +32,10 @@ public class Trip {
     public Instant getDepartureTime() {
         return departureTime;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Trip instance\njourneyRef : %-30sdepartureTime: %s\ndeparture: %s\narrival: %s",
+                journeyRef, departureTime.toString(), departure.toString(), arrival.toString());
+    }
 }

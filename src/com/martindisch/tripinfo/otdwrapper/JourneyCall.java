@@ -55,4 +55,14 @@ public class JourneyCall {
     public Instant getDepartureEstimated() {
         return departureEstimated;
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "JourneyCall instance\ntype: %10s name: %s\nstation type timetabled            estimated\narrival      %-22s%s\ndeparture    %-22s%s",
+                type == JourneyCall.PREVIOUS ? "previous" : "onward", name,
+                arrivalTimetabled != null ? arrivalTimetabled : "-", arrivalEstimated != null ? arrivalEstimated : "-",
+                departureTimetabled != null ? departureTimetabled : "-", departureEstimated != null ? departureEstimated : "-"
+        );
+    }
 }

@@ -18,4 +18,9 @@ public class Station {
     public String getCode() {
         return code;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Station instance\ncode: %-10sname: %s", code, name);
+    }
 }

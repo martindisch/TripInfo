@@ -21,4 +21,16 @@ public class Journey {
     public ArrayList<JourneyCall> getCalls() {
         return calls;
     }
+
+    @Override
+    public String toString() {
+        String callsString = "";
+        for (JourneyCall call : calls) {
+            callsString += call.toString() + "\n";
+        }
+        return String.format(
+                "Journey instance\njourneyRef: %s\ncalls:\n%s",
+                journeyRef, callsString
+        );
+    }
 }
