@@ -35,6 +35,8 @@ public class StationSelection {
         System.out.print("Select a station: ");
         int arrivalIndex = Integer.parseInt(System.console().readLine());
 
+        System.out.println();
+
         return new Station[]{departureStations.get(departureIndex), arrivalStations.get(arrivalIndex)};
     }
 }
