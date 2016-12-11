@@ -11,6 +11,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class LiveView {
 
+    private static final int STATION_DELAY = 20;
+
     /**
      * Shows the progress of the trip's journey between the two current stations.
      *
@@ -44,7 +46,7 @@ public class LiveView {
      */
     private static void printHeader(JourneyCall previous, JourneyCall onward) {
         if (previous == null || onward == null) {
-            System.out.println("This service is not currently active");
+            System.out.println("\nThis service is not currently active");
             System.exit(0);
         }
         System.out.println();
@@ -77,8 +79,8 @@ public class LiveView {
             departure = previous.getDepartureTimetabled();
             arrival = onward.getDepartureTimetabled();
         }
-        long timeTotal = departure.until(arrival, ChronoUnit.SECONDS);
-        long timeTravelled = departure.until(Instant.now(), ChronoUnit.SECONDS);
+        long timeTotal = departure.plus(STATION_DELAY, ChronoUnit.SECONDS).until(arrival, ChronoUnit.SECONDS);
+        long timeTravelled = departure.plus(STATION_DELAY, ChronoUnit.SECONDS).until(Instant.now(), ChronoUnit.SECONDS);
         double percentTravelled = (double) timeTravelled / timeTotal;
         if (percentTravelled < 0) percentTravelled = 0;
         else if (percentTravelled > 1) percentTravelled = 1;
