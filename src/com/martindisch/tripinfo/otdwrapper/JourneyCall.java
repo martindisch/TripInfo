@@ -65,4 +65,26 @@ public class JourneyCall {
                 departureTimetabled != null ? departureTimetabled : "-", departureEstimated != null ? departureEstimated : "-"
         );
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof JourneyCall) {
+            if (name.contentEquals(((JourneyCall) o).getName()) && type == ((JourneyCall) o).getType()) {
+                if (arrivalTimetabled != null && ((JourneyCall) o).getArrivalTimetabled() != null) {
+                    if (!arrivalTimetabled.equals(((JourneyCall) o).getArrivalTimetabled())) return false;
+                }
+                if (arrivalEstimated != null && ((JourneyCall) o).getArrivalEstimated() != null) {
+                    if (!arrivalEstimated.equals(((JourneyCall) o).getArrivalEstimated())) return false;
+                }
+                if (departureTimetabled != null && ((JourneyCall) o).getDepartureTimetabled() != null) {
+                    if (!departureTimetabled.equals(((JourneyCall) o).getDepartureTimetabled())) return false;
+                }
+                if (departureEstimated != null && ((JourneyCall) o).getDepartureEstimated() != null) {
+                    if (!departureEstimated.equals(((JourneyCall) o).getDepartureEstimated())) return false;
+                }
+                return true;
+            }
+        }
+        return false;
+    }
 }
