@@ -1,6 +1,9 @@
 package com.martindisch.tripinfo.otdwrapper;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 /**
  * Platform-independent utility functions for {@link OTDHandler}.
@@ -39,5 +42,35 @@ public class HandlerUtil {
      */
     public static Instant emptyAsNull(String input) {
         return (input.contentEquals("") ? null : Instant.parse(input));
+    }
+
+    /**
+     * Returns the two current (last previous and first onward) calls of the journey.
+     *
+     * @param journey the journey to look at
+     * @return array with the last previous and first onward call of the journey
+     */
+    public static JourneyCall[] getCurrentCalls(Journey journey) {
+        JourneyCall lastPrevious = null, firstOnward = null;
+        for (JourneyCall call : journey.getCalls()) {
+            if (call.getType() == JourneyCall.PREVIOUS) {
+                lastPrevious = call;
+            } else {
+                firstOnward = call;
+                break;
+            }
+        }
+        return new JourneyCall[]{lastPrevious, firstOnward};
+    }
+
+    /**
+     * Returns the instant formatted as only time using the local timezone.
+     *
+     * @param instant the instant to format
+     * @return the instant's time in the local timezone
+     */
+    public static String formatTimeLocal(Instant instant) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withZone(ZoneId.systemDefault());
+        return formatter.format(instant);
     }
 }
