@@ -1,11 +1,7 @@
 package com.martindisch.tripinfo.interaction;
 
-import com.martindisch.tripinfo.otdwrapper.HandlerException;
-import com.martindisch.tripinfo.otdwrapper.OTDHandler;
-import com.martindisch.tripinfo.otdwrapper.Station;
-import com.martindisch.tripinfo.otdwrapper.Trip;
+import com.martindisch.tripinfo.otdwrapper.*;
 
-import java.time.ZoneId;
 import java.util.ArrayList;
 
 /**
@@ -26,7 +22,7 @@ public class JourneySelection {
         System.out.println("Contacting server for trips...");
         ArrayList<Trip> trips = handler.getTrips(departure, arrival);
         for (int i = 0; i < trips.size(); i++) {
-            System.out.printf("%4d: departing %s at %s\n", i, trips.get(i).getDeparture().getName(), trips.get(i).getDepartureTime().atZone(ZoneId.systemDefault()).toString());
+            System.out.printf("%4d: departing %s at %s\n", i, trips.get(i).getDeparture().getName(), HandlerUtil.formatTimeLocal(trips.get(i).getDepartureTime()));
         }
         System.out.print("Select a connection: ");
         int tripIndex = Integer.parseInt(System.console().readLine());
