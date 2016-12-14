@@ -77,7 +77,7 @@ public class LiveView {
             arrival = onward.getArrivalEstimated();
         } else {
             departure = previous.getDepartureTimetabled();
-            arrival = onward.getDepartureTimetabled();
+            arrival = onward.getArrivalTimetabled();
         }
         long timeTotal = departure.plus(STATION_DELAY, ChronoUnit.SECONDS).until(arrival, ChronoUnit.SECONDS);
         long timeTravelled = departure.plus(STATION_DELAY, ChronoUnit.SECONDS).until(Instant.now(), ChronoUnit.SECONDS);
