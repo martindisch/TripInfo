@@ -45,7 +45,8 @@ public class HandlerUtil {
     }
 
     /**
-     * Returns the two current (last previous and first onward) calls of the journey.
+     * Returns the two current (last previous and first onward) calls of the journey or null, if the journey has
+     * not yet started (only onward calls) or is already over (only previous calls).
      *
      * @param journey the journey to look at
      * @return array with the last previous and first onward call of the journey
@@ -60,6 +61,7 @@ public class HandlerUtil {
                 break;
             }
         }
+        if (lastPrevious == null || firstOnward == null) return null;
         return new JourneyCall[]{lastPrevious, firstOnward};
     }
 

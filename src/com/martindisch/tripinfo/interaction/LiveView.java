@@ -26,6 +26,10 @@ public class LiveView {
             while (true) {
                 Journey journey = handler.getJourney(trip.getJourneyRef());
                 JourneyCall[] currentCalls = HandlerUtil.getCurrentCalls(journey);
+                if (currentCalls == null) {
+                    System.out.println("\nThis service is not currently active");
+                    break;
+                }
                 if (!(lastPair != null && lastPair[0].equals(currentCalls[0]) && lastPair[1].equals(currentCalls[1]))) {
                     printHeader(currentCalls[0], currentCalls[1]);
                 }
@@ -45,10 +49,6 @@ public class LiveView {
      * @param onward the onward call
      */
     private static void printHeader(JourneyCall previous, JourneyCall onward) {
-        if (previous == null || onward == null) {
-            System.out.println("\nThis service is not currently active");
-            System.exit(0);
-        }
         System.out.println();
         System.out.println();
         System.out.printf("%-40s%40s\n", previous.getName(), onward.getName());
